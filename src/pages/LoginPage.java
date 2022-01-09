@@ -1,71 +1,45 @@
 package pages;
 
 import org.junit.Assert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class LoginPage {
-
-    HomePage homePage;
-    String siteURL = "https://checkit.sunbeam.cf/";
-    String driverPath = "/Users/jonathanporter/Developer/testFiles/chromedriver";
-    WebDriver driver;
+public class LoginPage extends BasePage {
 
     public LoginPage(WebDriver driver) {
-        this.driver = driver;
-        PageFactory.initElements(driver, this);
+        super(driver);
     }
 
     // TODO: Swap out plain text credentials for an environment variable
-    public String username = "1234";
-    public String password = "1234";
-
-    public String invalidUsername = "1234";
+    public String email = "testconsecutively@gmail.com";
+    public String password = "passwordisEZtoguess";
+    public String invalidEmail = "invalid@invalid.com";
     public String invalidPassword = "1234";
 
+    @FindBy(css = "a[text='Log in with Google']")
+    public WebElement loginWithGoogleButton;
 
-    @FindBy(css = "a[text=\"Log In\"]")
+    @FindBy(css = "button[type='submit']")
     public WebElement loginButton;
 
-    @FindBy(id = "identifierId")
+    @FindBy(name = "email")
     public WebElement emailField;
 
     @FindBy(name = "password")
     public WebElement passwordField;
 
-    public void enterCredentials(String username, String password) {
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        wait.until(ExpectedConditions.visibilityOf(emailField));
-        emailField.sendKeys(username);
-        emailField.sendKeys(Keys.ENTER);
+    @FindBy(xpath = "//*[text()='Invalid email or password, please try again.']")
+    public WebElement invalidPasswordError;
 
-        wait.until(ExpectedConditions.visibilityOf(passwordField));
+    public HomePage enterCredentials(String email, String password) {
+        emailField.sendKeys(email);
         passwordField.sendKeys(password);
-        passwordField.sendKeys(Keys.ENTER);
-    }
-
-    public void openLoginWindow() {
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        wait.until(ExpectedConditions.elementToBeClickable(loginButton));
         loginButton.click();
-        for(String winHandle : driver.getWindowHandles())
-        {
-            driver.switchTo().window(winHandle);
-        }
+        return new HomePage(driver);
     }
 
-    public void switchToHomePage() {
-        String parentWindow = driver.getWindowHandle();
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        driver.switchTo().window(parentWindow);
-        wait.until(ExpectedConditions.visibilityOf(homePage.homeIdentifier));
-        Assert.assertTrue(homePage.homeIdentifier.isDisplayed());
+    public void isPasswordInvalid() {
+        Assert.assertTrue(invalidPasswordError.isDisplayed());
     }
 }
